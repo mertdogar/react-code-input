@@ -43,6 +43,8 @@ export function Hints({
     [mappedHints]
   );
 
+  console.log("hints", { mappedHints, filteredHints, hints, activeToken });
+
   const hintRefs = filteredHints.map(() => React.createRef<HTMLDivElement>());
   const [styles, setStyles] = React.useState(getComputedStyles(null, 0));
 

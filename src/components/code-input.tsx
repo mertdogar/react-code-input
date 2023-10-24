@@ -160,6 +160,7 @@ export function CodeInput(props: CodeInputProps) {
 
     setActiveTokenIndex(activeTokenIndex);
     if (newActiveToken.hints) {
+      console.log("newActiveToken", newActiveToken);
       setHints(newActiveToken.hints);
     } else {
       setHints([]);
@@ -213,7 +214,7 @@ export function CodeInput(props: CodeInputProps) {
     nativeInputSet("selectionEnd", newCursorPosition);
     inputRef.current?.dispatchEvent(new Event("change", { bubbles: true }));
   };
-
+  console.log("tokens", tokens, activeHint);
   return (
     <div style={{ ...styles.container, ...computedStyles.container }}>
       <Input
@@ -260,7 +261,7 @@ export function CodeInput(props: CodeInputProps) {
       <Hints
         inputRef={inputRef}
         hints={hints}
-        activeToken={tokens[activeHint]}
+        activeToken={tokens[activeTokenIndex || 0]}
         activeIndex={activeHint}
         offsetLeft={hintOffset}
         onSelectHint={(activeHintIndex) => {

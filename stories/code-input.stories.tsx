@@ -27,6 +27,13 @@ const Template: Story<CodeInputProps> = (args) => (
         m1: {
           type: "string",
         },
+        m2: {
+          type: "object",
+          properties: {
+            a1: { type: "number" },
+            a2: { type: "number" },
+          },
+        },
       },
     }}
     {...args}
