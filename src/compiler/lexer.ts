@@ -5,7 +5,23 @@ export const IDENTIFIER = /[a-z0-9_]/i;
 export const DOT = /\./;
 export const WHITESPACE = /\s/;
 export const QUOTE_MARK = /['"]/;
-export const OPERATORS = ["+", "-", "/", "*"];
+export const OPERATORS = [
+  "+",
+  "-",
+  "/",
+  "*",
+  ">",
+  "<",
+  ">",
+  "<",
+  "!",
+  "&",
+  "|",
+  "&",
+  "^",
+  "%",
+  "=",
+];
 
 export const getTokens = (code: string) => {
   const tokens: Token[] = [];

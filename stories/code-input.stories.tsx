@@ -18,7 +18,20 @@ const meta: Meta = {
 
 export default meta;
 
-const Template: Story<CodeInputProps> = (args) => <CodeInput {...args} />;
+const Template: Story<CodeInputProps> = (args) => (
+  <CodeInput
+    schema={{
+      $id: "a",
+      type: "object",
+      properties: {
+        m1: {
+          type: "string",
+        },
+      },
+    }}
+    {...args}
+  />
+);
 
 export const Default = Template.bind({});
 Default.args = {};
