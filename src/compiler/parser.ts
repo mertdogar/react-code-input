@@ -1,12 +1,12 @@
 import { AST, Token } from "./types";
 
-const ADDSUB = /^\+$|^\-$/;
+const ADDSUB = /^\+$|^-$/;
 const MULDIV = /^\*$|^\/$/;
 
 type Cursor = Token & { next: Token | null };
 
 export const buildAST = (allTokens: Token[]): AST | null => {
-  const tokens = allTokens.filter(token => token.type !== "whitespace");
+  const tokens = allTokens.filter((token) => token.type !== "whitespace");
   let i = -1;
   let token = getNextToken();
 
@@ -83,7 +83,7 @@ export const buildAST = (allTokens: Token[]): AST | null => {
   }
 
   function parseExpression(): AST {
-    let node: AST | void;
+    let node: AST | void = undefined;
 
     // Sub Expression
     if (token?.type === "leftParen") {
@@ -190,7 +190,7 @@ export class ParseError extends Error {
     super();
     const padEnd =
       (token && token.start + 1) || allTokens[allTokens.length - 1].end;
-    const originalCode = allTokens.map(t => t.raw || t.value).join("");
+    const originalCode = allTokens.map((t) => t.raw || t.value).join("");
     const leftPadding = Array.from(new Array(padEnd)).join(" ");
     this.message = `${message}\n\n${originalCode}\n${leftPadding}^`;
     Object.setPrototypeOf(this, ParseError.prototype);

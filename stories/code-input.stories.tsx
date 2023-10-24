@@ -9,20 +9,6 @@ const meta: Meta = {
     symbols: { control: { type: "array" } },
   },
   args: {
-    symbols: [
-      "accruedInterest",
-      "adjustedDiscountPrice",
-      "all",
-      "any",
-      "commission",
-      "costs",
-      "cpa",
-      "cvr",
-      "price",
-      "profit",
-      "salePrice",
-      "vat",
-    ],
     placeholder: "any(salePrice - vat, cpa)",
   },
   parameters: {
@@ -32,7 +18,7 @@ const meta: Meta = {
 
 export default meta;
 
-const Template: Story<CodeInputProps> = args => <CodeInput {...args} />;
+const Template: Story<CodeInputProps> = (args) => <CodeInput {...args} />;
 
 export const Default = Template.bind({});
 Default.args = {};
@@ -51,9 +37,8 @@ export const ControlledInput = () => {
   const [state, setState] = React.useState("123");
   return (
     <CodeInput
-      symbols={["HEY", "THERE"]}
       value={state}
-      onChange={e => {
+      onChange={(e) => {
         setState(e.currentTarget.value.toUpperCase());
       }}
     />

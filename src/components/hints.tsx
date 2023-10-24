@@ -1,7 +1,9 @@
-import React, { CSSProperties } from "react";
+import React, { CSSProperties, useMemo } from "react";
+import { EditorToken } from "../compiler";
 
 interface HintsProps {
   hints: string[];
+  activeToken: EditorToken;
   activeIndex: number;
   offsetLeft: number;
   onSelectHint: (index: number) => any;
@@ -10,19 +12,47 @@ interface HintsProps {
 
 export function Hints({
   hints,
+  activeToken,
   activeIndex,
   offsetLeft,
   onSelectHint,
   inputRef,
 }: HintsProps) {
-  if (!hints.length) return null;
   const containerRef = React.createRef<HTMLDivElement>();
-  const hintRefs = hints.map(() => React.createRef<HTMLDivElement>());
+  const parts = activeToken ? activeToken.value.split(".") : [];
+
+  const mappedHints = useMemo(
+    () =>
+      (hints || []).map((hint, index) => {
+        return {
+          hint: hint
+            .split(".")
+            .slice(parts.length - 1, parts.length)
+            .join("."),
+          index,
+        };
+      }),
+    [hints]
+  );
+
+  const filteredHints = useMemo(
+    () =>
+      mappedHints.filter((value, index, self) => {
+        return self.findIndex(({ hint }) => hint == value.hint) === index;
+      }),
+    [mappedHints]
+  );
+
+  const hintRefs = filteredHints.map(() => React.createRef<HTMLDivElement>());
   const [styles, setStyles] = React.useState(getComputedStyles(null, 0));
 
   React.useLayoutEffect(() => {
-    const activeHintRef = hintRefs[activeIndex];
+    const realIndex = filteredHints.findIndex(
+      ({ index }) => index === activeIndex
+    );
+    const activeHintRef = hintRefs[realIndex];
     const containerEl = containerRef.current;
+    if (!activeHintRef) return;
     const targetEl = activeHintRef.current;
 
     if (!containerEl || !targetEl) return;
@@ -38,27 +68,29 @@ export function Hints({
     } else if (targetOffsetTop < containerEl.scrollTop) {
       containerEl.scrollTop = targetOffsetTop;
     }
-  }, [activeIndex]);
+  }, [activeIndex, filteredHints]);
 
   React.useLayoutEffect(() => {
     setStyles(getComputedStyles(inputRef.current, offsetLeft));
   }, []);
 
+  if (!hints.length) return null;
+
   return (
     <div style={styles.positioningContainer}>
       <div style={styles.stackingContainer}>
         <div ref={containerRef} style={styles.hints}>
-          {hints.map((hint, i) => (
+          {filteredHints.map(({ hint, index }) => (
             <div
-              ref={hintRefs[i]}
-              key={i}
+              ref={hintRefs[index]}
+              key={index}
               style={{
                 ...styles.hint,
-                ...(activeIndex === i ? styles.hintActive : {}),
+                ...(activeIndex === index ? styles.hintActive : {}),
               }}
               onMouseDown={(e) => {
                 e.preventDefault();
-                onSelectHint(i);
+                onSelectHint(index);
               }}
             >
               {hint}

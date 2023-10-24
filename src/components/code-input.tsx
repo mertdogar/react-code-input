@@ -6,7 +6,6 @@ import { AST, Token, EditorToken } from "../compiler/types";
 import { styles, getComputedStyles, getTokenStyles } from "./styles";
 
 export interface CodeInputProps extends React.InputHTMLAttributes<{}> {
-  symbols?: string[];
   customInputComponent?: React.JSXElementConstructor<
     React.InputHTMLAttributes<{}>
   >;
@@ -21,7 +20,6 @@ export interface CodeInputProps extends React.InputHTMLAttributes<{}> {
 
 export function CodeInput(props: CodeInputProps) {
   const {
-    symbols = [],
     style = {},
     onChange = () => {},
     onParse,
@@ -40,7 +38,40 @@ export function CodeInput(props: CodeInputProps) {
     : inputProps.value?.toString() || "";
 
   const sourceTokens = useMemo(() => getTokens(value), [value]);
-  const tokens = useMemo(() => getEditorTokens(sourceTokens, symbols), [value]);
+  const tokens = useMemo(
+    () =>
+      getEditorTokens(sourceTokens, {
+        $id: "s",
+        type: "object",
+        properties: {
+          accruedInterest: { type: "string" },
+          adjustedDiscountPrice: { type: "string" },
+          all: { type: "string" },
+          any: { type: "string" },
+          commission: { type: "string" },
+          costs: { type: "string" },
+          cpa: { type: "string" },
+          cvr: { type: "string" },
+          price: { type: "string" },
+          profit: { type: "string" },
+          salePrice: { type: "string" },
+
+          hayret: {
+            type: "object",
+            properties: {
+              mesut: {
+                type: "object",
+                properties: {
+                  a1: { type: "string" },
+                  a2: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+      }),
+    [value]
+  );
 
   const [activeTokenIndex, setActiveTokenIndex] = useState<number | null>();
   const [hints, setHints] = useState<string[]>([]);
@@ -55,8 +86,8 @@ export function CodeInput(props: CodeInputProps) {
   useEffect(() => {
     let ast;
     const errors = tokens
-      .filter(t => !t.valid)
-      .map(t => new Error(`Cannot find identifier ${t.value}`));
+      .filter((t) => !t.valid)
+      .map((t) => new Error(`Cannot find identifier ${t.value}`));
 
     try {
       ast = buildAST(sourceTokens);
@@ -101,7 +132,7 @@ export function CodeInput(props: CodeInputProps) {
 
     if (ctrl && space && !hints.length) {
       handleSelectToken(e);
-      setHints(symbols);
+      setHints([]);
     }
     if (!hints.length) {
       return;
@@ -175,7 +206,6 @@ export function CodeInput(props: CodeInputProps) {
 
     let newCursorPosition = 0;
     let completedValue = "";
-
     if (inputIsEmtpy) {
       completedValue = hints[hintIndex];
       newCursorPosition = completedValue.length;
@@ -212,7 +242,7 @@ export function CodeInput(props: CodeInputProps) {
         spellCheck="false"
         style={{ ...style, ...styles.input }}
         value={inputProps.value || value}
-        onScroll={e => setScrollPosition(e.currentTarget.scrollLeft)}
+        onScroll={(e) => setScrollPosition(e.currentTarget.scrollLeft)}
         onBlur={() => setHints([])}
         onFocus={handleSelectToken}
         onClick={handleSelectToken}
@@ -249,9 +279,10 @@ export function CodeInput(props: CodeInputProps) {
       <Hints
         inputRef={inputRef}
         hints={hints}
+        activeToken={tokens[activeHint]}
         activeIndex={activeHint}
         offsetLeft={hintOffset}
-        onSelectHint={activeHintIndex => {
+        onSelectHint={(activeHintIndex) => {
           completeHint(inputRef.current as HTMLInputElement, activeHintIndex);
         }}
       />

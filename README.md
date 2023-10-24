@@ -6,17 +6,15 @@ Provides basic tokenisation, parsing, syntax highlighting, validation and code c
 
 There are zero dependencies and you can style the input in any way that you want.
 
-[View examples →](http://react-code-input.netlify.app)
-
 ## Quick start
 
 ```tsx
-import { CodeInput } from "@djgrant/react-code-input";
+import { CodeInput } from "@mertdogar/react-code-input";
 
 export default () => (
   <CodeInput
     placeholder="price - vat"
-    symbols={["price", "vat"]}
+    schema={...JSON7...}
     customInputComponent={MyInput}
     style={{ width: "300px" }}
     onChange={event => {

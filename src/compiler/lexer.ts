@@ -1,7 +1,8 @@
 import { Token } from "./types";
 
-export const NUMBER = /[0-9.]/;
+export const NUMBER = /[0-9]/;
 export const IDENTIFIER = /[a-z0-9_]/i;
+export const DOT = /\./;
 export const WHITESPACE = /\s/;
 export const QUOTE_MARK = /['"]/;
 export const OPERATORS = ["+", "-", "/", "*"];
@@ -13,7 +14,6 @@ export const getTokens = (code: string) => {
   while (index < code.length) {
     const start = index;
     let char = code[index];
-
     if (char === "(") {
       tokens.push({
         type: "leftParen",
@@ -79,12 +79,23 @@ export const getTokens = (code: string) => {
       });
       continue;
     }
+
     if (NUMBER.test(char)) {
       let seq = "";
-      while (NUMBER.test(char)) {
+      while (char && NUMBER.test(char)) {
         seq += char;
         char = code[++index];
       }
+
+      if (DOT.test(char) && NUMBER.test(code[index + 1])) {
+        seq += char;
+        char = code[++index];
+        while (NUMBER.test(char)) {
+          seq += char;
+          char = code[++index];
+        }
+      }
+
       tokens.push({
         type: "number",
         value: seq,
@@ -93,6 +104,32 @@ export const getTokens = (code: string) => {
       });
       continue;
     }
+
+    if (IDENTIFIER.test(char)) {
+      let seq = "";
+      while (char && IDENTIFIER.test(char)) {
+        seq += char;
+        char = code[++index];
+      }
+
+      while (DOT.test(char) && IDENTIFIER.test(code[index + 1])) {
+        seq += char;
+        char = code[++index];
+        while (char && IDENTIFIER.test(char)) {
+          seq += char;
+          char = code[++index];
+        }
+      }
+
+      tokens.push({
+        type: ["true", "false"].includes(seq) ? "boolean" : "identifier",
+        value: seq,
+        start,
+        end: index,
+      });
+      continue;
+    }
+
     if (QUOTE_MARK.test(char)) {
       const quoteMark = char;
       let seq = quoteMark;
@@ -121,20 +158,7 @@ export const getTokens = (code: string) => {
       }
       continue;
     }
-    if (IDENTIFIER.test(char)) {
-      let seq = "";
-      while (char && IDENTIFIER.test(char)) {
-        seq += char;
-        char = code[++index];
-      }
-      tokens.push({
-        type: ["true", "false"].includes(seq) ? "boolean" : "identifier",
-        value: seq,
-        start,
-        end: index,
-      });
-      continue;
-    }
+
     if (WHITESPACE.test(char)) {
       tokens.push({
         type: "whitespace",
