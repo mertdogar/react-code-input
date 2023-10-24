@@ -1,5 +1,7 @@
 import React, { CSSProperties, useMemo } from "react";
 import { EditorToken } from "../compiler";
+import { JSONSchema7 } from "json-schema";
+import * as JSONSchemaLibrary from "json-schema-library";
 
 interface HintsProps {
   hints: string[];
@@ -7,6 +9,7 @@ interface HintsProps {
   activeIndex: number;
   offsetLeft: number;
   onSelectHint: (index: number) => any;
+  schema: JSONSchema7;
   inputRef: React.RefObject<HTMLInputElement>;
 }
 
@@ -16,11 +19,14 @@ export function Hints({
   activeIndex,
   offsetLeft,
   onSelectHint,
+  schema,
   inputRef,
 }: HintsProps) {
   const containerRef = React.createRef<HTMLDivElement>();
   const parts = activeToken ? activeToken.value.split(".") : [];
-
+  const schema_ = useMemo(() => new JSONSchemaLibrary.Draft07(schema), [
+    schema,
+  ]);
   const mappedHints = useMemo(
     () =>
       (hints || []).map((hint, index) => {
@@ -30,6 +36,10 @@ export function Hints({
             .slice(parts.length - 1, parts.length)
             .join("."),
           index,
+          pointer: `/${hint.split(".").join("/")}`,
+          schema: schema_.getSchema({
+            pointer: `/${hint.split(".").join("/")}`,
+          }),
         };
       }),
     [hints]
@@ -42,8 +52,6 @@ export function Hints({
       }),
     [mappedHints]
   );
-
-  console.log("hints", { mappedHints, filteredHints, hints, activeToken });
 
   const hintRefs = filteredHints.map(() => React.createRef<HTMLDivElement>());
   const [styles, setStyles] = React.useState(getComputedStyles(null, 0));
@@ -82,7 +90,7 @@ export function Hints({
     <div style={styles.positioningContainer}>
       <div style={styles.stackingContainer}>
         <div ref={containerRef} style={styles.hints}>
-          {filteredHints.map(({ hint, index }) => (
+          {filteredHints.map(({ hint, index, schema }) => (
             <div
               ref={hintRefs[index]}
               key={index}
@@ -95,7 +103,7 @@ export function Hints({
                 onSelectHint(index);
               }}
             >
-              {hint}
+              {hint} [{schema?.type}]
             </div>
           ))}
         </div>

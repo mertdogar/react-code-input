@@ -31,6 +31,11 @@ export function CodeInput(props: CodeInputProps) {
   } = props;
   const Input = customInputComponent || "input";
   const inputIsUncontrolled = typeof inputProps.value === "undefined";
+  const schema_ = schema || {
+    $id: "global",
+    type: "object",
+    properties: {},
+  };
 
   const [controlledValue, setControlledValue] = useState(
     (inputIsUncontrolled && props.defaultValue?.toString()) || ""
@@ -41,18 +46,7 @@ export function CodeInput(props: CodeInputProps) {
     : inputProps.value?.toString() || "";
 
   const sourceTokens = useMemo(() => getTokens(value), [value]);
-  const tokens = useMemo(
-    () =>
-      getEditorTokens(
-        sourceTokens,
-        schema || {
-          $id: "global",
-          type: "object",
-          properties: {},
-        }
-      ),
-    [value]
-  );
+  const tokens = useMemo(() => getEditorTokens(sourceTokens, schema_), [value]);
 
   const [activeTokenIndex, setActiveTokenIndex] = useState<number | null>();
   const [hints, setHints] = useState<string[]>([]);
@@ -160,7 +154,6 @@ export function CodeInput(props: CodeInputProps) {
 
     setActiveTokenIndex(activeTokenIndex);
     if (newActiveToken.hints) {
-      console.log("newActiveToken", newActiveToken);
       setHints(newActiveToken.hints);
     } else {
       setHints([]);
@@ -214,7 +207,7 @@ export function CodeInput(props: CodeInputProps) {
     nativeInputSet("selectionEnd", newCursorPosition);
     inputRef.current?.dispatchEvent(new Event("change", { bubbles: true }));
   };
-  console.log("tokens", tokens, activeHint);
+
   return (
     <div style={{ ...styles.container, ...computedStyles.container }}>
       <Input
@@ -260,6 +253,7 @@ export function CodeInput(props: CodeInputProps) {
       </div>
       <Hints
         inputRef={inputRef}
+        schema={schema_}
         hints={hints}
         activeToken={tokens[activeTokenIndex || 0]}
         activeIndex={activeHint}
