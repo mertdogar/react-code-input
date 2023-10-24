@@ -4,6 +4,7 @@ import { Hints } from "./hints";
 import { getTokens, getEditorTokens, buildAST } from "../compiler";
 import { AST, Token, EditorToken } from "../compiler/types";
 import { styles, getComputedStyles, getTokenStyles } from "./styles";
+import { JSONSchema7 } from "json-schema";
 
 export interface CodeInputProps extends React.InputHTMLAttributes<{}> {
   customInputComponent?: React.JSXElementConstructor<
@@ -11,6 +12,7 @@ export interface CodeInputProps extends React.InputHTMLAttributes<{}> {
   >;
   style?: CSSProperties;
   onChange?: (event: React.SyntheticEvent<HTMLInputElement>) => void;
+  schema: JSONSchema7;
   onParse?: (params: {
     tokens: Token[];
     ast: AST | null | void;
@@ -24,6 +26,7 @@ export function CodeInput(props: CodeInputProps) {
     onChange = () => {},
     onParse,
     customInputComponent,
+    schema,
     ...inputProps
   } = props;
   const Input = customInputComponent || "input";
@@ -40,36 +43,14 @@ export function CodeInput(props: CodeInputProps) {
   const sourceTokens = useMemo(() => getTokens(value), [value]);
   const tokens = useMemo(
     () =>
-      getEditorTokens(sourceTokens, {
-        $id: "s",
-        type: "object",
-        properties: {
-          accruedInterest: { type: "string" },
-          adjustedDiscountPrice: { type: "string" },
-          all: { type: "string" },
-          any: { type: "string" },
-          commission: { type: "string" },
-          costs: { type: "string" },
-          cpa: { type: "string" },
-          cvr: { type: "string" },
-          price: { type: "string" },
-          profit: { type: "string" },
-          salePrice: { type: "string" },
-
-          hayret: {
-            type: "object",
-            properties: {
-              mesut: {
-                type: "object",
-                properties: {
-                  a1: { type: "string" },
-                  a2: { type: "string" },
-                },
-              },
-            },
-          },
-        },
-      }),
+      getEditorTokens(
+        sourceTokens,
+        schema || {
+          $id: "global",
+          type: "object",
+          properties: {},
+        }
+      ),
     [value]
   );
 
